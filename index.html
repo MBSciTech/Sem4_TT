@@ -3,169 +3,533 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lecture Timetable</title>
+  <title>College Timetable System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js">
   <style>
-    body {
+    :root {
+      --primary: #4a8cff;
+      --primary-dark: #3a6fd8;
+      --secondary: #ff7b72;
+      --bg-dark: #0d1117;
+      --card-bg: #161b22;
+      --button-bg: #21262d;
+      --text-light: #c9d1d9;
+      --text-highlight: #ffffff;
+    }
+    
+    * {
+      box-sizing: border-box;
       margin: 0;
+      padding: 0;
+    }
+    
+    body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #0d1117;
-      color: #c9d1d9;
+      background: linear-gradient(135deg, var(--bg-dark) 0%, #121824 100%);
+      color: var(--text-light);
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      padding: 20px;
     }
+    
     .container {
-      background-color: #161b22;
+      background-color: var(--card-bg);
       padding: 2rem;
       border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0, 123, 255, 0.2);
-      max-width: 550px;
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(74, 140, 255, 0.2);
+      max-width: 650px;
       width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
+    
     h1 {
-      color: #58a6ff;
+      color: var(--text-highlight);
       text-align: center;
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+      font-size: 2rem;
+      position: relative;
+      padding-bottom: 0.7rem;
     }
+    
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 3px;
+    }
+    
+    .selector-container {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .selector {
+      flex: 1;
+    }
+    
+    .selector label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--primary);
+    }
+    
+    .selector select {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 8px;
+      background-color: var(--button-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-light);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+    
+    .selector select:hover, 
+    .selector select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(74, 140, 255, 0.2);
+    }
+    
     .navbar {
       display: flex;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 0.5rem;
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      z-index: 1;
     }
+    
     .day-btn {
       flex: 1;
-      background-color: #21262d;
-      color: #c9d1d9;
-      border: none;
-      border-radius: 6px;
-      padding: 0.5rem;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    .day-btn:hover,
-    .day-btn.active {
-      background-color: #58a6ff;
-      color: #0d1117;
-      font-weight: bold;
-    }
-    .lecture {
-      background-color: #21262d;
-      padding: 1rem;
+      background-color: var(--button-bg);
+      color: var(--text-light);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 8px;
-      margin-bottom: 0.8rem;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+      padding: 0.7rem 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+      outline: none;
     }
+    
+    .day-btn:hover {
+      background-color: rgba(74, 140, 255, 0.2);
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    
+    .day-btn.active {
+      background-color: var(--primary);
+      color: var(--text-highlight);
+      font-weight: 600;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .lectures-container {
+      position: relative;
+    }
+    
+    .lecture {
+      background-color: var(--button-bg);
+      padding: 1.1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+      border-left: 4px solid var(--primary);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .lecture:hover {
+      transform: translateX(3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .lecture-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.8rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 0.5rem;
+    }
+    
+    .lecture-time {
+      font-weight: 600;
+      color: var(--primary);
+    }
+    
     .lecture span {
       display: block;
+      margin-bottom: 0.4rem;
     }
+    
+    .lecture span:last-child {
+      margin-bottom: 0;
+    }
+    
+    .lecture i {
+      width: 20px;
+      color: var(--primary);
+      margin-right: 6px;
+    }
+    
     .recess {
       text-align: center;
-      color: #ff7b72;
-      margin: 1rem 0;
+      color: var(--secondary);
+      margin: 1.2rem 0;
       font-weight: bold;
+      position: relative;
+      padding: 0.7rem 0;
+    }
+    
+    .recess::before,
+    .recess::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 30%;
+      height: 1px;
+      background: rgba(255, 123, 114, 0.3);
+    }
+    
+    .recess::before {
+      left: 0;
+    }
+    
+    .recess::after {
+      right: 0;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-light);
+      font-style: italic;
+    }
+    
+    .no-lectures {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-light);
+      font-style: italic;
+      background-color: rgba(255, 123, 114, 0.1);
+      border-radius: 8px;
+    }
+    
+    @media (max-width: 600px) {
+      .container {
+        padding: 1.5rem;
+      }
+      
+      .selector-container {
+        flex-direction: column;
+        gap: 0.8rem;
+      }
+      
+      .navbar {
+        gap: 0.4rem;
+      }
+      
+      .day-btn {
+        padding: 0.6rem 0.4rem;
+        font-size: 0.85rem;
+      }
+      
+      h1 {
+        font-size: 1.7rem;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Lecture Timetable</h1>
+    <h1>College Timetable</h1>
+    
+    <div class="selector-container">
+      <div class="selector">
+        <label for="branch-select">Select Branch</label>
+        <select id="branch-select">
+          <option value="A1">A1</option>
+          <option value="A2">A2</option>
+          <option value="A3">A3</option>
+          <option value="A4">A4</option>
+          <option value="A5">A5</option>
+          <option value="A6">A6</option>
+          <option value="A7">A7</option>
+          <option value="A8">A8</option>
+          <option value="A9">A9</option>
+        </select>
+      </div>
+    </div>
+    
     <div class="navbar" id="navbar"></div>
-    <div id="schedule"></div>
+    <div id="schedule" class="lectures-container"></div>
   </div>
 
   <script>
-    const timetable = {
-      Monday: [
-        { prof: "RHG", subject: "TOC", room: "310" },
-        { prof: "RHG", subject: "TOC", room: "310" },
-        "RECESS",
-        { prof: "PSK", subject: "DM", room: "310" },
-        { prof: "PSK", subject: "DM", room: "310" }
-      ],
-      Tuesday: [
-        { prof: "MVP", subject: "PY-2", room: "406-2" },
-        { prof: "MVP", subject: "PY-2", room: "406-2" },
-        "RECESS",
-        { prof: "DPB", subject: "FSD-2", room: "406-2" },
-        { prof: "DPB", subject: "FSD-2", room: "406-2" },
-        { prof: "PSK", subject: "DM", room: "310" }
-      ],
-      Wednesday: [
-        { prof: "MVP", subject: "PY-2", room: "406-2" },
-        { prof: "MVP", subject: "PY-2", room: "406-2" },
-        "RECESS",
-        { prof: "UMS", subject: "COA", room: "310" },
-        { prof: "UMS", subject: "COA", room: "310" }
-      ],
-      Thursday: [
-        { prof: "DPB", subject: "FSD-2", room: "406-2" },
-        { prof: "DPB", subject: "FSD-2", room: "406-2" },
-        "RECESS",
-        { prof: "RHG", subject: "TOC", room: "310" },
-        { prof: "RHG", subject: "TOC", room: "310" },
-        { prof: "UMS", subject: "COA", room: "310" }
-      ],
-      Friday: [
-        { prof: "DPB", subject: "DM", room: "310" },
-        { prof: "DPB", subject: "DM", room: "310" },
-        "RECESS",
-        { prof: "PSK", subject: "PY-2", room: "406-2" },
-        { prof: "PSK", subject: "PY-2", room: "406-2" }
-      ],
-      Saturday: [
-        { prof: "MVP", subject: "FSD-2", room: "406-2" },
-        { prof: "MVP", subject: "FSD-2", room: "406-2" },
-        "RECESS",
-        { prof: "RHG", subject: "COA", room: "310" },
-        { prof: "RHG", subject: "COA", room: "310" }
-      ]
-    };
-
-    const days = Object.keys(timetable);
+    // Define time slots
+    const timeSlots = [
+      "8:45 AM - 9:45 AM",
+      "9:45 AM - 10:45 AM", 
+      "10:45 AM - 11:30 AM", // RECESS
+      "11:30 AM - 12:30 PM",
+      "12:30 PM - 1:30 PM",
+      "1:45 PM - 2:45 PM"  // Added 6th period
+    ];
+    
+    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const navbar = document.getElementById('navbar');
     const scheduleDiv = document.getElementById('schedule');
+    const branchSelect = document.getElementById('branch-select');
+    
+    let currentBranch = branchSelect.value;
+    let currentDay = '';
+    let timetableData = [];
 
-    function renderSchedule(day) {
-      scheduleDiv.innerHTML = '';
-      document.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('active'));
-      document.getElementById(`btn-${day}`).classList.add('active');
-
-      const lectures = timetable[day] || [];
-      lectures.forEach(entry => {
-        if (entry === "RECESS") {
-          const recess = document.createElement('div');
-          recess.className = 'recess';
-          recess.textContent = 'RECESS';
-          scheduleDiv.appendChild(recess);
-        } else {
-          const div = document.createElement('div');
-          div.className = 'lecture';
-          div.innerHTML = `
-            <span><strong>Professor:</strong> ${entry.prof}</span>
-            <span><strong>Subject:</strong> ${entry.subject}</span>
-            <span><strong>Classroom:</strong> ${entry.room}</span>
-          `;
-          scheduleDiv.appendChild(div);
+    // Fetch and parse CSV data
+    async function fetchTimetableData() {
+      try {
+        const response = await fetch('timetable.csv');
+        const csvText = await response.text();
+        
+        // Parse CSV manually
+        const rows = csvText.split('\n');
+        const headers = rows[0].split(',');
+        
+        const data = [];
+        for (let i = 1; i < rows.length; i++) {
+          if (!rows[i].trim()) continue;
+          
+          const values = rows[i].split(',');
+          const entry = {};
+          
+          headers.forEach((header, index) => {
+            entry[header.trim()] = values[index] ? values[index].trim() : '';
+          });
+          
+          data.push(entry);
         }
-      });
+        
+        timetableData = data;
+        return data;
+      } catch (error) {
+        console.error('Error fetching timetable data:', error);
+        return [];
+      }
     }
 
+    // Parse a period string into components
+    function parsePeriod(periodString) {
+      if (!periodString || periodString === 'RECESS') {
+        return { isRecess: periodString === 'RECESS' };
+      }
+      
+      if (periodString.trim() === '') {
+        return null; // Empty period
+      }
+      
+      const parts = periodString.split('-');
+      if (parts.length < 3) return null;
+      
+      const prof = parts[0];
+      
+      // Handle subjects that include their version numbers (PY-2, FSD-2, etc.)
+      let subject;
+      let room;
+      
+      // Check if this is a subject with a version number
+      if (['PY', 'FSD'].includes(parts[1])) {
+        subject = parts[1] + '-' + parts[2];
+        // Room starts at position 3
+        room = parts.slice(3).join('-');
+      } else {
+        // For other subjects without version numbers
+        subject = parts[1];
+        // Room starts at position 2
+        room = parts.slice(2).join('-');
+      }
+      
+      return { prof, subject, room, isRecess: false };
+    }
+
+    // Get timetable for a specific branch and day
+    function getTimetableForBranchAndDay(branch, day) {
+      const entries = timetableData.filter(entry => 
+        entry.Branch === branch && entry.Day === day
+      );
+      
+      if (entries.length === 0) return [];
+      
+      const entry = entries[0];
+      const periods = [];
+      
+      // Process the periods
+      for (let i = 1; i <= 6; i++) {
+        if (i === 3) {
+          // The third slot is the recess
+          periods.push("RECESS");
+          continue;
+        }
+        
+        let periodKey;
+        
+        if (i < 3) {
+          periodKey = `Period${i}`;
+        } else if (i > 3) {
+          periodKey = `Period${i-1}`;
+          if (i === 6) { // Special case for Period5
+            periodKey = 'Period5';
+          }
+        }
+        
+        const periodData = parsePeriod(entry[periodKey]);
+        
+        if (periodData) {
+          if (periodData.isRecess) {
+            periods.push("RECESS");
+          } else if (periodData.prof) {
+            periods.push({
+              prof: periodData.prof,
+              subject: periodData.subject,
+              room: periodData.room
+            });
+          } else {
+            periods.push(null);
+          }
+        } else {
+          periods.push(null);
+        }
+      }
+      
+      return periods;
+    }
+
+    function renderSchedule(day) {
+      scheduleDiv.innerHTML = '<div class="loading">Loading schedule...</div>';
+      
+      setTimeout(async () => {
+        // Make sure we have data
+        if (timetableData.length === 0) {
+          await fetchTimetableData();
+        }
+        
+        scheduleDiv.innerHTML = '';
+        document.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`btn-${day}`).classList.add('active');
+        currentDay = day;
+
+        const branch = branchSelect.value;
+        const lectures = getTimetableForBranchAndDay(branch, day);
+        
+        if (lectures.length === 0) {
+          scheduleDiv.innerHTML = '<div class="no-lectures">No lectures scheduled for this day.</div>';
+          return;
+        }
+        
+        lectures.forEach((entry, index) => {
+          if (entry === "RECESS") {
+            const recess = document.createElement('div');
+            recess.className = 'recess';
+            recess.textContent = '✨ RECESS ✨';
+            scheduleDiv.appendChild(recess);
+          } else if (entry === null) {
+            // Free period or no class
+            if (index < timeSlots.length) {
+              const emptySlot = document.createElement('div');
+              emptySlot.className = 'lecture';
+              emptySlot.innerHTML = `
+                <div class="lecture-header">
+                  <div class="lecture-time">
+                    <i class="fas fa-clock"></i> ${timeSlots[index]}
+                  </div>
+                  <div class="lecture-extra">Free Period</div>
+                </div>
+                <span><i class="fas fa-coffee"></i> <strong>No scheduled class</strong></span>
+              `;
+              scheduleDiv.appendChild(emptySlot);
+            }
+          } else {
+            const div = document.createElement('div');
+            div.className = 'lecture';
+            
+            // Add time slot at the top
+            let timeSlotHTML = '';
+            if (timeSlots[index]) {
+              timeSlotHTML = `
+                <div class="lecture-header">
+                  <div class="lecture-time">
+                    <i class="fas fa-clock"></i> ${timeSlots[index]}
+                  </div>
+                </div>
+              `;
+            }
+            
+            div.innerHTML = `
+              ${timeSlotHTML}
+              <span><i class="fas fa-user-tie"></i> <strong>Professor:</strong> ${entry.prof}</span>
+              <span><i class="fas fa-book"></i> <strong>Subject:</strong> ${entry.subject}</span>
+              <span><i class="fas fa-door-open"></i> <strong>Room:</strong> ${entry.room}</span>
+            `;
+            scheduleDiv.appendChild(div);
+          }
+        });
+      }, 300);
+    }
+    
     // Create navbar buttons
-    days.forEach(day => {
-      const btn = document.createElement('button');
-      btn.textContent = day;
-      btn.className = 'day-btn';
-      btn.id = `btn-${day}`;
-      btn.onclick = () => renderSchedule(day);
-      navbar.appendChild(btn);
+    function createDayButtons() {
+      navbar.innerHTML = '';
+      days.forEach(day => {
+        const btn = document.createElement('button');
+        btn.textContent = day;
+        btn.className = 'day-btn';
+        btn.id = `btn-${day}`;
+        btn.onclick = () => renderSchedule(day);
+        navbar.appendChild(btn);
+      });
+    }
+    
+    // Handle branch change
+    branchSelect.addEventListener('change', function() {
+      currentBranch = this.value;
+      if (currentDay) {
+        renderSchedule(currentDay);
+      } else {
+        // Auto-load today's schedule or Monday if today is not a weekday
+        const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+        const defaultDay = days.includes(today) ? today : days[0];
+        renderSchedule(defaultDay);
+      }
     });
 
-    // Auto-load today's schedule
-    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-    renderSchedule(timetable[today] ? today : days[0]);
+    // Initialize the page
+    async function initializePage() {
+      await fetchTimetableData();
+      createDayButtons();
+      
+      // Auto-load today's schedule or Monday if today is not a weekday
+      const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+      const defaultDay = days.includes(today) ? today : days[0];
+      renderSchedule(defaultDay);
+    }
+    
+    // Start the app
+    initializePage();
   </script>
 </body>
 </html>
