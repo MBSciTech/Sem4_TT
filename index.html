@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lecture Timetable</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0d1117;
+      color: #c9d1d9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background-color: #161b22;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 123, 255, 0.2);
+      max-width: 550px;
+      width: 100%;
+    }
+    h1 {
+      color: #58a6ff;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .day-btn {
+      flex: 1;
+      background-color: #21262d;
+      color: #c9d1d9;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .day-btn:hover,
+    .day-btn.active {
+      background-color: #58a6ff;
+      color: #0d1117;
+      font-weight: bold;
+    }
+    .lecture {
+      background-color: #21262d;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 0.8rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+    .lecture span {
+      display: block;
+    }
+    .recess {
+      text-align: center;
+      color: #ff7b72;
+      margin: 1rem 0;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Lecture Timetable</h1>
+    <div class="navbar" id="navbar"></div>
+    <div id="schedule"></div>
+  </div>
+
+  <script>
+    const timetable = {
+      Monday: [
+        { prof: "RHG", subject: "TOC", room: "310" },
+        { prof: "RHG", subject: "TOC", room: "310" },
+        "RECESS",
+        { prof: "PSK", subject: "DM", room: "310" },
+        { prof: "PSK", subject: "DM", room: "310" }
+      ],
+      Tuesday: [
+        { prof: "MVP", subject: "PY-2", room: "406-2" },
+        { prof: "MVP", subject: "PY-2", room: "406-2" },
+        "RECESS",
+        { prof: "DPB", subject: "FSD-2", room: "406-2" },
+        { prof: "DPB", subject: "FSD-2", room: "406-2" },
+        { prof: "PSK", subject: "DM", room: "310" }
+      ],
+      Wednesday: [
+        { prof: "MVP", subject: "PY-2", room: "406-2" },
+        { prof: "MVP", subject: "PY-2", room: "406-2" },
+        "RECESS",
+        { prof: "UMS", subject: "COA", room: "310" },
+        { prof: "UMS", subject: "COA", room: "310" }
+      ],
+      Thursday: [
+        { prof: "DPB", subject: "FSD-2", room: "406-2" },
+        { prof: "DPB", subject: "FSD-2", room: "406-2" },
+        "RECESS",
+        { prof: "RHG", subject: "TOC", room: "310" },
+        { prof: "RHG", subject: "TOC", room: "310" },
+        { prof: "UMS", subject: "COA", room: "310" }
+      ],
+      Friday: [
+        { prof: "DPB", subject: "DM", room: "310" },
+        { prof: "DPB", subject: "DM", room: "310" },
+        "RECESS",
+        { prof: "PSK", subject: "PY-2", room: "406-2" },
+        { prof: "PSK", subject: "PY-2", room: "406-2" }
+      ],
+      Saturday: [
+        { prof: "MVP", subject: "FSD-2", room: "406-2" },
+        { prof: "MVP", subject: "FSD-2", room: "406-2" },
+        "RECESS",
+        { prof: "RHG", subject: "COA", room: "310" },
+        { prof: "RHG", subject: "COA", room: "310" }
+      ]
+    };
+
+    const days = Object.keys(timetable);
+    const navbar = document.getElementById('navbar');
+    const scheduleDiv = document.getElementById('schedule');
+
+    function renderSchedule(day) {
+      scheduleDiv.innerHTML = '';
+      document.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(`btn-${day}`).classList.add('active');
+
+      const lectures = timetable[day] || [];
+      lectures.forEach(entry => {
+        if (entry === "RECESS") {
+          const recess = document.createElement('div');
+          recess.className = 'recess';
+          recess.textContent = 'RECESS';
+          scheduleDiv.appendChild(recess);
+        } else {
+          const div = document.createElement('div');
+          div.className = 'lecture';
+          div.innerHTML = `
+            <span><strong>Professor:</strong> ${entry.prof}</span>
+            <span><strong>Subject:</strong> ${entry.subject}</span>
+            <span><strong>Classroom:</strong> ${entry.room}</span>
+          `;
+          scheduleDiv.appendChild(div);
+        }
+      });
+    }
+
+    // Create navbar buttons
+    days.forEach(day => {
+      const btn = document.createElement('button');
+      btn.textContent = day;
+      btn.className = 'day-btn';
+      btn.id = `btn-${day}`;
+      btn.onclick = () => renderSchedule(day);
+      navbar.appendChild(btn);
+    });
+
+    // Auto-load today's schedule
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+    renderSchedule(timetable[today] ? today : days[0]);
+  </script>
+</body>
+</html>
