@@ -304,7 +304,7 @@
     // Fetch and parse CSV data
     async function fetchTimetableData() {
       try {
-        const response = await fetch('timetable.csv');
+        const response = await fetch('./timetable.csv');
         const csvText = await response.text();
         
         // Parse CSV manually
