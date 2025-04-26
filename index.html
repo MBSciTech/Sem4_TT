@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>College Timetable System</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Today's Academic Status</title>
   <style>
     :root {
       --primary: #4a8cff;
@@ -16,6 +14,12 @@
       --button-bg: #21262d;
       --text-light: #c9d1d9;
       --text-highlight: #ffffff;
+      --status-regular: #4ade80;
+      --status-test: #f97316;
+      --status-holiday: #fb7185;
+      --status-reading: #a78bfa;
+      --status-break: #60a5fa;
+      --status-evaluation: #facc15;
     }
     
     * {
@@ -40,9 +44,10 @@
       padding: 2rem;
       border-radius: 12px;
       box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(74, 140, 255, 0.2);
-      max-width: 650px;
+      max-width: 500px;
       width: 100%;
       border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
     }
     
     h1 {
@@ -67,469 +72,361 @@
       border-radius: 3px;
     }
     
-    .selector-container {
-      display: flex;
-      gap: 1rem;
+    .date-display {
+      font-size: 1.4rem;
       margin-bottom: 1.5rem;
-    }
-    
-    .selector {
-      flex: 1;
-    }
-    
-    .selector label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
       color: var(--primary);
     }
     
-    .selector select {
-      width: 100%;
-      padding: 0.8rem;
-      border-radius: 8px;
-      background-color: var(--button-bg);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-light);
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      outline: none;
-    }
-    
-    .selector select:hover, 
-    .selector select:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(74, 140, 255, 0.2);
-    }
-    
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
-      position: relative;
-      z-index: 1;
-    }
-    
-    .day-btn {
-      flex: 1;
-      background-color: var(--button-bg);
-      color: var(--text-light);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      padding: 0.7rem 0.5rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 0.95rem;
-      outline: none;
-    }
-    
-    .day-btn:hover {
-      background-color: rgba(74, 140, 255, 0.2);
-      transform: translateY(-2px);
-      border-color: var(--primary);
-    }
-    
-    .day-btn.active {
-      background-color: var(--primary);
-      color: var(--text-highlight);
-      font-weight: 600;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    }
-    
-    .lectures-container {
-      position: relative;
-    }
-    
-    .lecture {
-      background-color: var(--button-bg);
-      padding: 1.1rem;
-      border-radius: 10px;
-      margin-bottom: 1rem;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-      border-left: 4px solid var(--primary);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .lecture:hover {
-      transform: translateX(3px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    }
-    
-    .lecture-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 0.8rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding-bottom: 0.5rem;
-    }
-    
-    .lecture-time {
-      font-weight: 600;
-      color: var(--primary);
-    }
-    
-    .lecture span {
-      display: block;
-      margin-bottom: 0.4rem;
-    }
-    
-    .lecture span:last-child {
-      margin-bottom: 0;
-    }
-    
-    .lecture i {
-      width: 20px;
-      color: var(--primary);
-      margin-right: 6px;
-    }
-    
-    .recess {
-      text-align: center;
-      color: var(--secondary);
-      margin: 1.2rem 0;
+    .status-badge {
+      display: inline-block;
+      font-size: 1.5rem;
       font-weight: bold;
-      position: relative;
-      padding: 0.7rem 0;
-    }
-    
-    .recess::before,
-    .recess::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      width: 30%;
-      height: 1px;
-      background: rgba(255, 123, 114, 0.3);
-    }
-    
-    .recess::before {
-      left: 0;
-    }
-    
-    .recess::after {
-      right: 0;
-    }
-    
-    .loading {
-      text-align: center;
-      padding: 2rem;
-      color: var(--text-light);
-      font-style: italic;
-    }
-    
-    .no-lectures {
-      text-align: center;
-      padding: 2rem;
-      color: var(--text-light);
-      font-style: italic;
-      background-color: rgba(255, 123, 114, 0.1);
+      padding: 1rem 2rem;
       border-radius: 8px;
+      margin-bottom: 1.5rem;
     }
     
-    @media (max-width: 600px) {
-      .container {
-        padding: 1.5rem;
-      }
-      
-      .selector-container {
-        flex-direction: column;
-        gap: 0.8rem;
-      }
-      
-      .navbar {
-        gap: 0.4rem;
-      }
-      
-      .day-btn {
-        padding: 0.6rem 0.4rem;
-        font-size: 0.85rem;
-      }
-      
-      h1 {
-        font-size: 1.7rem;
-      }
+    .regular-teaching { background-color: var(--status-regular); color: #111; }
+    .test-day { background-color: var(--status-test); color: #111; }
+    .holiday { background-color: var(--status-holiday); color: #111; }
+    .reading-holiday { background-color: var(--status-reading); color: #111; }
+    .break { background-color: var(--status-break); color: #111; }
+    .project-evaluation { background-color: var(--status-evaluation); color: #111; }
+    
+    .details {
+      margin-top: 1.5rem;
+      line-height: 1.6;
+      font-size: 1.1rem;
+    }
+    
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      margin-top: 2rem;
+      gap: 1rem;
+    }
+    
+    .btn {
+      background-color: var(--button-bg);
+      color: var(--text-light);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 0.7rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+      text-decoration: none;
+    }
+    
+    .btn:hover {
+      background-color: var(--primary);
+      color: white;
+      transform: translateY(-2px);
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>College Timetable</h1>
-    
-    <div class="selector-container">
-      <div class="selector">
-        <label for="branch-select">Select Branch</label>
-        <select id="branch-select">
-          <option value="A1">A1</option>
-          <option value="A2">A2</option>
-          <option value="A3">A3</option>
-          <option value="A4">A4</option>
-          <option value="A5">A5</option>
-          <option value="A6">A6</option>
-          <option value="A7">A7</option>
-          <option value="A8">A8</option>
-          <option value="A9">A9</option>
-        </select>
-      </div>
+    <h1>Academic Calendar Status</h1>
+    <div class="date-display" id="current-date">Loading date...</div>
+    <div id="status-container">
+      <div class="status-badge" id="status-badge">Checking...</div>
+      <div class="details" id="status-details"></div>
     </div>
-    
-    <div class="navbar" id="navbar"></div>
-    <div id="schedule" class="lectures-container"></div>
+    <div class="action-buttons">
+      <a href="timetable.html" class="btn">View Timetable</a>
+      <button id="view-calendar-btn" class="btn">View Full Calendar</button>
+    </div>
   </div>
 
   <script>
-    // Define time slots
-    const timeSlots = [
-      "8:45 AM - 9:45 AM",
-      "9:45 AM - 10:45 AM", 
-      "10:45 AM - 11:30 AM", // RECESS
-      "11:30 AM - 12:30 PM",
-      "12:30 PM - 1:30 PM",
-      "1:45 PM - 2:45 PM"  // Added 6th period
+    // Academic calendar data
+    const calendarData = [
+      // March 2025
+      { date: "2025-03-01", status: "weekend" },
+      { date: "2025-03-02", status: "weekend" },
+      { date: "2025-03-03", status: "break", details: "Sem Break (Sport + Cultural Event)" },
+      { date: "2025-03-04", status: "break", details: "Sem Break (Sport + Cultural Event)" },
+      { date: "2025-03-05", status: "break", details: "Sem Break (Sport + Cultural Event)" },
+      { date: "2025-03-06", status: "break", details: "Sem Break (Sport + Cultural Event)" },
+      { date: "2025-03-07", status: "break", details: "Sem Break (Sport + Cultural Event)" },
+      { date: "2025-03-08", status: "break", details: "Sem Break (Sport + Cultural Event)" },
+      { date: "2025-03-09", status: "weekend" },
+      { date: "2025-03-10", status: "break", details: "Sem Break" },
+      { date: "2025-03-11", status: "break", details: "Sem Break" },
+      { date: "2025-03-12", status: "break", details: "Sem Break" },
+      { date: "2025-03-13", status: "break", details: "Sem Break" },
+      { date: "2025-03-14", status: "holiday", details: "Dhuleti" },
+      { date: "2025-03-15", status: "holiday", details: "Shifted Holiday of Parasuram Jayanti" },
+      { date: "2025-03-16", status: "weekend" },
+      { date: "2025-03-17", status: "teaching", details: "Regular Teaching - Day 1" },
+      { date: "2025-03-18", status: "teaching", details: "Regular Teaching - Day 2" },
+      { date: "2025-03-19", status: "teaching", details: "Regular Teaching - Day 3" },
+      { date: "2025-03-20", status: "teaching", details: "Regular Teaching - Day 4" },
+      { date: "2025-03-21", status: "teaching", details: "Regular Teaching - Day 5" },
+      { date: "2025-03-22", status: "teaching", details: "Regular Teaching - Day 6" },
+      { date: "2025-03-23", status: "weekend" },
+      { date: "2025-03-24", status: "teaching", details: "Regular Teaching - Day 7" },
+      { date: "2025-03-25", status: "teaching", details: "Regular Teaching - Day 8" },
+      { date: "2025-03-26", status: "teaching", details: "Regular Teaching - Day 9" },
+      { date: "2025-03-27", status: "teaching", details: "Regular Teaching - Day 10" },
+      { date: "2025-03-28", status: "teaching", details: "Regular Teaching - Day 11" },
+      { date: "2025-03-29", status: "teaching", details: "Regular Teaching - Day 12" },
+      { date: "2025-03-30", status: "weekend" },
+      { date: "2025-03-31", status: "holiday", details: "Ramjan Eid" },
+      
+      // April 2025
+      { date: "2025-04-01", status: "teaching", details: "Regular Teaching - Day 13" },
+      { date: "2025-04-02", status: "teaching", details: "Regular Teaching - Day 14" },
+      { date: "2025-04-03", status: "teaching", details: "Regular Teaching - Day 15" },
+      { date: "2025-04-04", status: "teaching", details: "Regular Teaching - Day 16" },
+      { date: "2025-04-05", status: "teaching", details: "Regular Teaching - Day 17" },
+      { date: "2025-04-06", status: "weekend" },
+      { date: "2025-04-07", status: "test", details: "Test-1 (DM)" },
+      { date: "2025-04-08", status: "reading", details: "Reading Holiday" },
+      { date: "2025-04-09", status: "test", details: "Test-1 (TOC)" },
+      { date: "2025-04-10", status: "holiday", details: "Mahavir Jayanti" },
+      { date: "2025-04-11", status: "reading", details: "Reading Holiday" },
+      { date: "2025-04-12", status: "test", details: "Test-1 (COA)" },
+      { date: "2025-04-13", status: "weekend" },
+      { date: "2025-04-14", status: "holiday", details: "Dr. Ambedkar Jayanti" },
+      { date: "2025-04-15", status: "test", details: "Test-1 (FSD-2)" },
+      { date: "2025-04-16", status: "reading", details: "Reading Holiday" },
+      { date: "2025-04-17", status: "test", details: "Test-1 (PYTHON-2)" },
+      { date: "2025-04-18", status: "holiday", details: "Holiday" },
+      { date: "2025-04-19", status: "holiday", details: "Shifted Holiday of Good Friday" },
+      { date: "2025-04-20", status: "weekend" },
+      { date: "2025-04-21", status: "teaching", details: "Regular Teaching - Day 18" },
+      { date: "2025-04-22", status: "teaching", details: "Regular Teaching - Day 19" },
+      { date: "2025-04-23", status: "teaching", details: "Regular Teaching - Day 20" },
+      { date: "2025-04-24", status: "teaching", details: "Regular Teaching - Day 21" },
+      { date: "2025-04-25", status: "teaching", details: "Regular Teaching - Day 22" },
+      { date: "2025-04-26", status: "teaching", details: "Regular Teaching - Day 23" },
+      { date: "2025-04-27", status: "weekend" },
+      { date: "2025-04-28", status: "teaching", details: "Regular Teaching - Day 24" },
+      { date: "2025-04-29", status: "teaching", details: "Regular Teaching - Day 25" },
+      { date: "2025-04-30", status: "teaching", details: "Regular Teaching - Day 26" },
+      
+      // May 2025
+      { date: "2025-05-01", status: "teaching", details: "Regular Teaching - Day 27" },
+      { date: "2025-05-02", status: "teaching", details: "Regular Teaching - Day 28" },
+      { date: "2025-05-03", status: "teaching", details: "Regular Teaching - Day 29" },
+      { date: "2025-05-04", status: "weekend" },
+      { date: "2025-05-05", status: "teaching", details: "Regular Teaching - Day 30" },
+      { date: "2025-05-06", status: "teaching", details: "Regular Teaching - Day 31" },
+      { date: "2025-05-07", status: "teaching", details: "Regular Teaching - Day 32" },
+      { date: "2025-05-08", status: "teaching", details: "Regular Teaching - Day 33" },
+      { date: "2025-05-09", status: "teaching", details: "Regular Teaching - Day 34" },
+      { date: "2025-05-10", status: "reading", details: "Reading Holiday" },
+      { date: "2025-05-11", status: "weekend" },
+      { date: "2025-05-12", status: "test", details: "Test-2 (DM)" },
+      { date: "2025-05-13", status: "reading", details: "Reading Holiday" },
+      { date: "2025-05-14", status: "test", details: "Test-2 (TOC)" },
+      { date: "2025-05-15", status: "reading", details: "Reading Holiday" },
+      { date: "2025-05-16", status: "test", details: "Test-2 (PYTHON-2)" },
+      { date: "2025-05-17", status: "reading", details: "Reading Holiday" },
+      { date: "2025-05-18", status: "weekend" },
+      { date: "2025-05-19", status: "test", details: "Test-2 (COA)" },
+      { date: "2025-05-20", status: "reading", details: "Reading Holiday" },
+      { date: "2025-05-21", status: "test", details: "Test-2 (FSD-2)" },
+      { date: "2025-05-22", status: "break", details: "Mini Break" },
+      { date: "2025-05-23", status: "break", details: "Mini Break" },
+      { date: "2025-05-24", status: "break", details: "Mini Break" },
+      { date: "2025-05-25", status: "weekend" },
+      { date: "2025-05-26", status: "teaching", details: "Regular Teaching - Day 35" },
+      { date: "2025-05-27", status: "teaching", details: "Regular Teaching - Day 36" },
+      { date: "2025-05-28", status: "teaching", details: "Regular Teaching - Day 37" },
+      { date: "2025-05-29", status: "teaching", details: "Regular Teaching - Day 38" },
+      { date: "2025-05-30", status: "teaching", details: "Regular Teaching - Day 39" },
+      { date: "2025-05-31", status: "teaching", details: "Regular Teaching - Day 40" },
+      
+      // June 2025
+      { date: "2025-06-01", status: "weekend" },
+      { date: "2025-06-02", status: "teaching", details: "Regular Teaching - Day 41" },
+      { date: "2025-06-03", status: "teaching", details: "Regular Teaching - Day 42" },
+      { date: "2025-06-04", status: "teaching", details: "Regular Teaching - Day 43" },
+      { date: "2025-06-05", status: "teaching", details: "Regular Teaching - Day 44" },
+      { date: "2025-06-06", status: "teaching", details: "Regular Teaching - Day 45" },
+      { date: "2025-06-07", status: "holiday", details: "Bakri Eid" },
+      { date: "2025-06-08", status: "weekend" },
+      { date: "2025-06-09", status: "teaching", details: "Regular Teaching - Day 46" },
+      { date: "2025-06-10", status: "teaching", details: "Regular Teaching - Day 47" },
+      { date: "2025-06-11", status: "teaching", details: "Regular Teaching - Day 48" },
+      { date: "2025-06-12", status: "teaching", details: "Regular Teaching - Day 49" },
+      { date: "2025-06-13", status: "teaching", details: "Regular Teaching - Day 50" },
+      { date: "2025-06-14", status: "teaching", details: "Regular Teaching - Day 51" },
+      { date: "2025-06-15", status: "weekend" },
+      { date: "2025-06-16", status: "test", details: "Test-3 (DM)" },
+      { date: "2025-06-17", status: "reading", details: "Reading Holiday" },
+      { date: "2025-06-18", status: "test", details: "Test-3 (TOC)" },
+      { date: "2025-06-19", status: "reading", details: "Reading Holiday" },
+      { date: "2025-06-20", status: "test", details: "Test-3 (COA)" },
+      { date: "2025-06-21", status: "reading", details: "Reading Holiday" },
+      { date: "2025-06-22", status: "weekend" },
+      { date: "2025-06-23", status: "test", details: "Test-3 (PYTHON-2)" },
+      { date: "2025-06-24", status: "reading", details: "Reading Holiday" },
+      { date: "2025-06-25", status: "test", details: "Test-3 (FSD-2)" },
+      { date: "2025-06-26", status: "break", details: "Mini Break" },
+      { date: "2025-06-27", status: "break", details: "Mini Break" },
+      { date: "2025-06-28", status: "break", details: "Mini Break" },
+      { date: "2025-06-29", status: "weekend" },
+      { date: "2025-06-30", status: "teaching", details: "Regular Teaching - Day 52" },
+      
+      // July 2025
+      { date: "2025-07-01", status: "teaching", details: "Regular Teaching - Day 53" },
+      { date: "2025-07-02", status: "teaching", details: "Regular Teaching - Day 54" },
+      { date: "2025-07-03", status: "teaching", details: "Regular Teaching - Day 55" },
+      { date: "2025-07-04", status: "teaching", details: "Regular Teaching - Day 56" },
+      { date: "2025-07-05", status: "teaching", details: "Regular Teaching - Day 57" },
+      { date: "2025-07-06", status: "weekend" },
+      { date: "2025-07-07", status: "teaching", details: "Regular Teaching - Day 58" },
+      { date: "2025-07-08", status: "teaching", details: "Regular Teaching - Day 59" },
+      { date: "2025-07-09", status: "teaching", details: "Regular Teaching - Day 60" },
+      { date: "2025-07-10", status: "teaching", details: "Regular Teaching - Day 61" },
+      { date: "2025-07-11", status: "teaching", details: "Regular Teaching - Day 62" },
+      { date: "2025-07-12", status: "teaching", details: "Regular Teaching - Day 63" },
+      { date: "2025-07-13", status: "weekend" },
+      { date: "2025-07-14", status: "teaching", details: "Regular Teaching - Day 64" },
+      { date: "2025-07-15", status: "teaching", details: "Regular Teaching - Day 65" },
+      { date: "2025-07-16", status: "teaching", details: "Regular Teaching - Day 66" },
+      { date: "2025-07-17", status: "teaching", details: "Regular Teaching - Day 67" },
+      { date: "2025-07-18", status: "teaching", details: "Regular Teaching - Day 68" },
+      { date: "2025-07-19", status: "reading", details: "Reading Holiday" },
+      { date: "2025-07-20", status: "weekend" },
+      { date: "2025-07-21", status: "test", details: "Test-4 (DM)" },
+      { date: "2025-07-22", status: "reading", details: "Reading Holiday" },
+      { date: "2025-07-23", status: "test", details: "Test-4 (TOC)" },
+      { date: "2025-07-24", status: "reading", details: "Reading Holiday" },
+      { date: "2025-07-25", status: "test", details: "Test-4 (COA)" },
+      { date: "2025-07-26", status: "reading", details: "Reading Holiday" },
+      { date: "2025-07-27", status: "weekend" },
+      { date: "2025-07-28", status: "reading", details: "Reading Holiday" },
+      { date: "2025-07-29", status: "test", details: "Test-4 (PYTHON-2)" },
+      { date: "2025-07-30", status: "reading", details: "Reading Holiday" },
+      { date: "2025-07-31", status: "test", details: "Test-4 (FSD-2)" },
+      
+      // August 2025
+      { date: "2025-08-01", status: "holiday", details: "Holiday" },
+      { date: "2025-08-02", status: "evaluation", details: "IPE/Project Evaluation" },
+      { date: "2025-08-03", status: "weekend" },
+      { date: "2025-08-04", status: "evaluation", details: "IPE/Project Evaluation" },
+      { date: "2025-08-05", status: "evaluation", details: "IPE/Project Evaluation" },
+      { date: "2025-08-06", status: "evaluation", details: "IPE/Project Evaluation" },
+      { date: "2025-08-07", status: "evaluation", details: "IPE/Project Evaluation" },
+      { date: "2025-08-08", status: "evaluation", details: "IPE/Project Evaluation" },
+      { date: "2025-08-09", status: "holiday", details: "Raksha Bandhan" },
+      { date: "2025-08-10", status: "weekend" },
+      { date: "2025-08-11", status: "evaluation", details: "IPE/Project Evaluation" },
+      { date: "2025-08-12", status: "evaluation", details: "IPE/Project Evaluation" },
+      { date: "2025-08-13", status: "evaluation", details: "IPE/Project Evaluation" },
+      { date: "2025-08-14", status: "evaluation", details: "IPE/Project Evaluation" },
+      { date: "2025-08-15", status: "holiday", details: "Independence Day" },
+      { date: "2025-08-16", status: "holiday", details: "Janmashtami" },
+      { date: "2025-08-17", status: "weekend" },
+      { date: "2025-08-18", status: "evaluation", details: "IPE/Project Evaluation" },
+      { date: "2025-08-19", status: "evaluation", details: "IPE/Project Evaluation" },
+      { date: "2025-08-20", status: "evaluation", details: "IPE/Project Evaluation" },
+      { date: "2025-08-21", status: "evaluation", details: "IPE/Project Evaluation" },
+      { date: "2025-08-22", status: "evaluation", details: "IPE/Project Evaluation" },
+      { date: "2025-08-23", status: "evaluation", details: "IPE/Project Evaluation" },
+      { date: "2025-08-24", status: "weekend" },
+      { date: "2025-08-25", status: "break", details: "Sem Break" },
+      { date: "2025-08-26", status: "break", details: "Sem Break" },
+      { date: "2025-08-27", status: "holiday", details: "Samvatsari" },
+      { date: "2025-08-28", status: "break", details: "Sem Break" },
+      { date: "2025-08-29", status: "break", details: "Sem Break" },
+      { date: "2025-08-30", status: "break", details: "Sem Break" },
+      { date: "2025-08-31", status: "weekend" }
     ];
-    
-    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const navbar = document.getElementById('navbar');
-    const scheduleDiv = document.getElementById('schedule');
-    const branchSelect = document.getElementById('branch-select');
-    
-    let currentBranch = branchSelect.value;
-    let currentDay = '';
-    let timetableData = [];
 
-    // Fetch and parse CSV data
-    async function fetchTimetableData() {
-      try {
-        const response = await fetch('./timetable.csv');
-        const csvText = await response.text();
-        
-        // Parse CSV manually
-        const rows = csvText.split('\n');
-        const headers = rows[0].split(',');
-        
-        const data = [];
-        for (let i = 1; i < rows.length; i++) {
-          if (!rows[i].trim()) continue;
-          
-          const values = rows[i].split(',');
-          const entry = {};
-          
-          headers.forEach((header, index) => {
-            entry[header.trim()] = values[index] ? values[index].trim() : '';
-          });
-          
-          data.push(entry);
-        }
-        
-        timetableData = data;
-        return data;
-      } catch (error) {
-        console.error('Error fetching timetable data:', error);
-        return [];
-      }
+    // Function to format date as "DD Month YYYY"
+    function formatDate(date) {
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      return date.toLocaleDateString('en-US', options);
     }
 
-    // Parse a period string into components
-    function parsePeriod(periodString) {
-      if (!periodString || periodString === 'RECESS') {
-        return { isRecess: periodString === 'RECESS' };
-      }
-      
-      if (periodString.trim() === '') {
-        return null; // Empty period
-      }
-      
-      const parts = periodString.split('-');
-      if (parts.length < 3) return null;
-      
-      const prof = parts[0];
-      
-      // Handle subjects that include their version numbers (PY-2, FSD-2, etc.)
-      let subject;
-      let room;
-      
-      // Check if this is a subject with a version number
-      if (['PY', 'FSD'].includes(parts[1])) {
-        subject = parts[1] + '-' + parts[2];
-        // Room starts at position 3
-        room = parts.slice(3).join('-');
+    // Function to get day entry from calendar data
+    function getDayStatus(dateString) {
+      const entry = calendarData.find(entry => entry.date === dateString);
+      if (entry) {
+        return entry;
       } else {
-        // For other subjects without version numbers
-        subject = parts[1];
-        // Room starts at position 2
-        room = parts.slice(2).join('-');
+        return { status: "unknown", details: "No information available" };
       }
-      
-      return { prof, subject, room, isRecess: false };
     }
 
-    // Get timetable for a specific branch and day
-    function getTimetableForBranchAndDay(branch, day) {
-      const entries = timetableData.filter(entry => 
-        entry.Branch === branch && entry.Day === day
-      );
+    // Function to update the display with today's status
+    function updateTodayStatus() {
+      const today = new Date();
       
-      if (entries.length === 0) return [];
+      // For demo purposes - allow setting a fake date via URL parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const demoDate = urlParams.get('demo');
       
-      const entry = entries[0];
-      const periods = [];
-      
-      // Process the periods
-      for (let i = 1; i <= 6; i++) {
-        if (i === 3) {
-          // The third slot is the recess
-          periods.push("RECESS");
-          continue;
-        }
-        
-        let periodKey;
-        
-        if (i < 3) {
-          periodKey = `Period${i}`;
-        } else if (i > 3) {
-          periodKey = `Period${i-1}`;
-          if (i === 6) { // Special case for Period5
-            periodKey = 'Period5';
-          }
-        }
-        
-        const periodData = parsePeriod(entry[periodKey]);
-        
-        if (periodData) {
-          if (periodData.isRecess) {
-            periods.push("RECESS");
-          } else if (periodData.prof) {
-            periods.push({
-              prof: periodData.prof,
-              subject: periodData.subject,
-              room: periodData.room
-            });
-          } else {
-            periods.push(null);
-          }
-        } else {
-          periods.push(null);
-        }
+      let dateToUse = today;
+      if (demoDate) {
+        dateToUse = new Date(demoDate);
       }
       
-      return periods;
-    }
-
-    function renderSchedule(day) {
-      scheduleDiv.innerHTML = '<div class="loading">Loading schedule...</div>';
+      const dateString = dateToUse.toISOString().split('T')[0];
+      const dayStatus = getDayStatus(dateString);
       
-      setTimeout(async () => {
-        // Make sure we have data
-        if (timetableData.length === 0) {
-          await fetchTimetableData();
-        }
-        
-        scheduleDiv.innerHTML = '';
-        document.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById(`btn-${day}`).classList.add('active');
-        currentDay = day;
-
-        const branch = branchSelect.value;
-        const lectures = getTimetableForBranchAndDay(branch, day);
-        
-        if (lectures.length === 0) {
-          scheduleDiv.innerHTML = '<div class="no-lectures">No lectures scheduled for this day.</div>';
-          return;
-        }
-        
-        lectures.forEach((entry, index) => {
-          if (entry === "RECESS") {
-            const recess = document.createElement('div');
-            recess.className = 'recess';
-            recess.textContent = '✨ RECESS ✨';
-            scheduleDiv.appendChild(recess);
-          } else if (entry === null) {
-            // Free period or no class
-            if (index < timeSlots.length) {
-              const emptySlot = document.createElement('div');
-              emptySlot.className = 'lecture';
-              emptySlot.innerHTML = `
-                <div class="lecture-header">
-                  <div class="lecture-time">
-                    <i class="fas fa-clock"></i> ${timeSlots[index]}
-                  </div>
-                  <div class="lecture-extra">Free Period</div>
-                </div>
-                <span><i class="fas fa-coffee"></i> <strong>No scheduled class</strong></span>
-              `;
-              scheduleDiv.appendChild(emptySlot);
-            }
-          } else {
-            const div = document.createElement('div');
-            div.className = 'lecture';
-            
-            // Add time slot at the top
-            let timeSlotHTML = '';
-            if (timeSlots[index]) {
-              timeSlotHTML = `
-                <div class="lecture-header">
-                  <div class="lecture-time">
-                    <i class="fas fa-clock"></i> ${timeSlots[index]}
-                  </div>
-                </div>
-              `;
-            }
-            
-            div.innerHTML = `
-              ${timeSlotHTML}
-              <span><i class="fas fa-user-tie"></i> <strong>Professor:</strong> ${entry.prof}</span>
-              <span><i class="fas fa-book"></i> <strong>Subject:</strong> ${entry.subject}</span>
-              <span><i class="fas fa-door-open"></i> <strong>Room:</strong> ${entry.room}</span>
-            `;
-            scheduleDiv.appendChild(div);
-          }
-        });
-      }, 300);
+      // Update date display
+      document.getElementById('current-date').textContent = formatDate(dateToUse);
+      
+      // Update status badge
+      const statusBadge = document.getElementById('status-badge');
+      const statusDetails = document.getElementById('status-details');
+      
+      statusBadge.className = 'status-badge';
+      
+      switch(dayStatus.status) {
+        case 'teaching':
+          statusBadge.textContent = "Regular Teaching";
+          statusBadge.classList.add('regular-teaching');
+          break;
+        case 'test':
+          statusBadge.textContent = "Test Day";
+          statusBadge.classList.add('test-day');
+          break;
+        case 'holiday':
+          statusBadge.textContent = "Holiday";
+          statusBadge.classList.add('holiday');
+          break;
+        case 'reading':
+          statusBadge.textContent = "Reading Holiday";
+          statusBadge.classList.add('reading-holiday');
+          break;
+        case 'break':
+          statusBadge.textContent = "Break";
+          statusBadge.classList.add('break');
+          break;
+        case 'evaluation':
+          statusBadge.textContent = "Project Evaluation";
+          statusBadge.classList.add('project-evaluation');
+          break;
+        case 'weekend':
+          statusBadge.textContent = "Weekend";
+          statusBadge.classList.add('holiday');
+          break;
+        default:
+          statusBadge.textContent = "Unknown";
+      }
+      
+      // Update details
+      statusDetails.textContent = dayStatus.details || '';
     }
     
-    // Create navbar buttons
-    function createDayButtons() {
-      navbar.innerHTML = '';
-      days.forEach(day => {
-        const btn = document.createElement('button');
-        btn.textContent = day;
-        btn.className = 'day-btn';
-        btn.id = `btn-${day}`;
-        btn.onclick = () => renderSchedule(day);
-        navbar.appendChild(btn);
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      updateTodayStatus();
+      
+      // View calendar button handler
+      document.getElementById('view-calendar-btn').addEventListener('click', function() {
+        alert('Full calendar view coming soon!');
       });
-    }
-    
-    // Handle branch change
-    branchSelect.addEventListener('change', function() {
-      currentBranch = this.value;
-      if (currentDay) {
-        renderSchedule(currentDay);
-      } else {
-        // Auto-load today's schedule or Monday if today is not a weekday
-        const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-        const defaultDay = days.includes(today) ? today : days[0];
-        renderSchedule(defaultDay);
-      }
     });
-
-    // Initialize the page
-    async function initializePage() {
-      await fetchTimetableData();
-      createDayButtons();
-      
-      // Auto-load today's schedule or Monday if today is not a weekday
-      const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-      const defaultDay = days.includes(today) ? today : days[0];
-      renderSchedule(defaultDay);
-    }
-    
-    // Start the app
-    initializePage();
   </script>
 </body>
-</html>
+</html> 
