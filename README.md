@@ -11,6 +11,8 @@ A responsive, modern web application for viewing college lecture timetables by b
 - 🌙 Dark mode interface for reduced eye strain
 - ✨ Modern UI with intuitive navigation
 - 🆓 Clearly shows free periods and recess times
+- 📊 Today's academic status display (teaching day, test, holiday, etc.)
+- 📆 Full semester calendar view with color-coded dates
 
 ## Time Slots
 
@@ -41,6 +43,19 @@ Each class entry follows this format:
   - Subject: PY-2 (Python)
   - Room: 406-7
 
+## Academic Calendar
+
+The system includes a comprehensive academic calendar for the semester covering:
+
+- 📗 Regular teaching days
+- 📝 Test days for all subjects
+- 🏖️ Holidays and festivals
+- 📚 Reading holidays
+- 🏫 Project evaluation periods
+- 🔄 Semester breaks
+
+All calendar dates are color-coded based on the type of academic activity.
+
 ## Subjects
 
 The timetable covers the following subjects:
@@ -53,10 +68,12 @@ The timetable covers the following subjects:
 
 ## How to Use
 
-1. Visit [https://mbscitech.github.io/Sem4_TT/](https://mbscitech.github.io/Sem4_TT/) or open `index.html` in any modern web browser
-2. Select your branch (A1-A9) from the dropdown
-3. Navigate through different days of the week using the day buttons
-4. View your complete schedule with time slots, professors, subjects, and room numbers
+1. Visit [https://mbscitech.github.io/Sem4_TT/](https://mbscitech.github.io/Sem4_TT/) or open `timetable.html` in any modern web browser
+2. View today's academic status at the top of the page
+3. Click on the status panel to view the full semester calendar
+4. Select your branch (A1-A9) from the dropdown
+5. Navigate through different days of the week using the day buttons
+6. View your complete schedule with time slots, professors, subjects, and room numbers
 
 ## Setup
 
@@ -67,7 +84,7 @@ The project is built with vanilla HTML, CSS, and JavaScript. No build step or in
    git clone https://github.com/MBSciTech/Sem4_TT.git
    ```
 
-2. Open `index.html` in your browser or deploy the files to any web server
+2. Open `timetable.html` in your browser or deploy the files to any web server
 
 ## Technologies Used
 
