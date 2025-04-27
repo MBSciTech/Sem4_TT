@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Login - College Timetable System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4a8cff;
+      --primary-dark: #3a6fd8;
+      --secondary: #ff7b72;
+      --bg-dark: #0d1117;
+      --card-bg: #161b22;
+      --button-bg: #21262d;
+      --text-light: #c9d1d9;
+      --text-highlight: #ffffff;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, var(--bg-dark) 0%, #121824 100%);
+      color: var(--text-light);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      background-color: var(--card-bg);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(74, 140, 255, 0.2);
+      max-width: 450px;
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    h1 {
+      color: var(--text-highlight);
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+      font-size: 2rem;
+      position: relative;
+      padding-bottom: 0.7rem;
+    }
+    
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 3px;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--primary);
+    }
+    
+    input {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 8px;
+      background-color: var(--button-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-light);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+    
+    input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(74, 140, 255, 0.2);
+    }
+    
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 8px;
+      background-color: var(--primary);
+      border: none;
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    button:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+    
+    .error-message {
+      color: var(--secondary);
+      margin-top: 1rem;
+      text-align: center;
+      display: none;
+    }
+    
+    .back-link {
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+    
+    .back-link a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+    
+    .header-icon {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 3rem;
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-icon">
+      <i class="fas fa-user-shield"></i>
+    </div>
+    <h1>Admin Login</h1>
+    <form id="login-form">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Enter HOD username">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter password">
+      </div>
+      <button type="submit">Login</button>
+      <div class="error-message" id="error-message">
+        Invalid username or password!
+      </div>
+    </form>
+    <div class="back-link">
+      <a href="timetable.html"><i class="fas fa-arrow-left"></i> Back to Timetable</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      
+      // Simple authentication - in a real application, this would be handled server-side
+      if (username === 'hod_admin' && password === 'admin123') {
+        // Store authentication state (do NOT use this approach for real authentication)
+        localStorage.setItem('isAdminLoggedIn', 'true');
+        
+        // Redirect to admin panel
+        window.location.href = 'admin_panel.html';
+      } else {
+        // Show error message
+        document.getElementById('error-message').style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html> 

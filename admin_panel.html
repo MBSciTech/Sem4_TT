@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel - College Timetable System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4a8cff;
+      --primary-dark: #3a6fd8;
+      --secondary: #ff7b72;
+      --bg-dark: #0d1117;
+      --card-bg: #161b22;
+      --button-bg: #21262d;
+      --text-light: #c9d1d9;
+      --text-highlight: #ffffff;
+      --success: #4ade80;
+      --warning: #fbbf24;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, var(--bg-dark) 0%, #121824 100%);
+      color: var(--text-light);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    h1, h2, h3 {
+      color: var(--text-highlight);
+      font-weight: 600;
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .user-info i {
+      color: var(--primary);
+      font-size: 1.5rem;
+    }
+    
+    .logout-btn {
+      background-color: transparent;
+      border: 1px solid var(--secondary);
+      color: var(--secondary);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .logout-btn:hover {
+      background-color: var(--secondary);
+      color: white;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .tab {
+      padding: 0.8rem 1.5rem;
+      background-color: var(--button-bg);
+      color: var(--text-light);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .tab.active {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .tab:hover {
+      background-color: var(--primary-dark);
+      color: white;
+    }
+    
+    .panel {
+      background-color: var(--card-bg);
+      padding: 2rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      display: none;
+    }
+    
+    .panel.active {
+      display: block;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--primary);
+    }
+    
+    select, input, textarea {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 8px;
+      background-color: var(--button-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-light);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      outline: none;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(74, 140, 255, 0.2);
+    }
+    
+    button {
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      background-color: var(--primary);
+      border: none;
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    button:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+    
+    .save-btn {
+      background-color: var(--success);
+    }
+    
+    .save-btn:hover {
+      background-color: #3aad68;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+    }
+    
+    th, td {
+      padding: 0.8rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    th {
+      color: var(--primary);
+    }
+    
+    .action-btn {
+      background-color: transparent;
+      border: none;
+      color: var(--primary);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      padding: 0.3rem;
+    }
+    
+    .edit-btn:hover {
+      color: var(--warning);
+    }
+    
+    .delete-btn {
+      color: var(--secondary);
+    }
+    
+    .delete-btn:hover {
+      color: #ff5a52;
+    }
+    
+    .notification {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+    
+    .success {
+      background-color: rgba(74, 222, 128, 0.2);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+    
+    .alert {
+      background-color: rgba(251, 113, 133, 0.2);
+      color: var(--secondary);
+      border: 1px solid var(--secondary);
+    }
+    
+    .calendar-entry {
+      background-color: var(--button-bg);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .timetable-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    
+    .timetable-card {
+      background-color: var(--button-bg);
+      padding: 1.2rem;
+      border-radius: 8px;
+    }
+    
+    .timetable-card h3 {
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 0.5rem;
+    }
+    
+    .period {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+    
+    .period:last-child {
+      border-bottom: none;
+    }
+    
+    @media (max-width: 768px) {
+      .tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 0.5rem;
+      }
+      
+      .panel {
+        padding: 1.5rem;
+      }
+      
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      
+      .user-info {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Admin Panel</h1>
+      <div class="user-info">
+        <div>
+          <i class="fas fa-user-shield"></i>
+          <span>HOD Admin</span>
+        </div>
+        <button class="logout-btn" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </div>
+    </header>
+    
+    <div class="notification success" id="success-notification">
+      Changes saved successfully!
+    </div>
+    
+    <div class="notification alert" id="error-notification">
+      Error saving changes. Please try again.
+    </div>
+    
+    <div class="tabs">
+      <div class="tab active" data-tab="timetable">Timetable Management</div>
+      <div class="tab" data-tab="calendar">Academic Calendar</div>
+      <div class="tab" data-tab="announcements">Announcements</div>
+    </div>
+    
+    <!-- Timetable Panel -->
+    <div class="panel active" id="timetable-panel">
+      <h2>Timetable Management</h2>
+      <p>Edit class schedules for different branches and days.</p>
+      
+      <div class="form-group">
+        <label for="branch-select">Select Branch</label>
+        <select id="branch-select">
+          <option value="A1">A1</option>
+          <option value="A2">A2</option>
+          <option value="A3">A3</option>
+          <option value="A4">A4</option>
+          <option value="A5">A5</option>
+          <option value="A6">A6</option>
+          <option value="A7">A7</option>
+          <option value="A8">A8</option>
+          <option value="A9">A9</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="day-select">Select Day</label>
+        <select id="day-select">
+          <option value="Monday">Monday</option>
+          <option value="Tuesday">Tuesday</option>
+          <option value="Wednesday">Wednesday</option>
+          <option value="Thursday">Thursday</option>
+          <option value="Friday">Friday</option>
+          <option value="Saturday">Saturday</option>
+        </select>
+      </div>
+      
+      <div id="timetable-editor">
+        <h3>Edit Schedule</h3>
+        <div class="form-group">
+          <label for="period1">Period 1 (8:45 AM - 9:45 AM)</label>
+          <input type="text" id="period1" placeholder="Format: PROF-SUBJECT-ROOM (e.g., KMS-PY-2-406-7)">
+        </div>
+        
+        <div class="form-group">
+          <label for="period2">Period 2 (9:45 AM - 10:45 AM)</label>
+          <input type="text" id="period2" placeholder="Format: PROF-SUBJECT-ROOM">
+        </div>
+        
+        <div class="form-group">
+          <label>Break (10:45 AM - 11:30 AM)</label>
+          <input type="text" disabled value="RECESS">
+        </div>
+        
+        <div class="form-group">
+          <label for="period3">Period 3 (11:30 AM - 12:30 PM)</label>
+          <input type="text" id="period3" placeholder="Format: PROF-SUBJECT-ROOM">
+        </div>
+        
+        <div class="form-group">
+          <label for="period4">Period 4 (12:30 PM - 1:30 PM)</label>
+          <input type="text" id="period4" placeholder="Format: PROF-SUBJECT-ROOM">
+        </div>
+        
+        <div class="form-group">
+          <label for="period5">Period 5 (1:45 PM - 2:45 PM)</label>
+          <input type="text" id="period5" placeholder="Format: PROF-SUBJECT-ROOM (optional)">
+        </div>
+        
+        <button class="save-btn" id="save-timetable">Save Changes</button>
+      </div>
+    </div>
+    
+    <!-- Calendar Panel -->
+    <div class="panel" id="calendar-panel">
+      <h2>Academic Calendar Management</h2>
+      <p>Edit academic calendar entries for the semester.</p>
+      
+      <div class="form-group">
+        <label for="month-select">Select Month</label>
+        <select id="month-select">
+          <option value="2025-03">March 2025</option>
+          <option value="2025-04">April 2025</option>
+          <option value="2025-05">May 2025</option>
+          <option value="2025-06">June 2025</option>
+          <option value="2025-07">July 2025</option>
+          <option value="2025-08">August 2025</option>
+        </select>
+      </div>
+      
+      <div id="calendar-entries">
+        <!-- Calendar entries will be loaded here -->
+        <div class="calendar-entry">
+          <div>
+            <strong>2025-03-17</strong> - Regular Teaching - Day 1
+          </div>
+          <div>
+            <button class="action-btn edit-btn"><i class="fas fa-edit"></i></button>
+            <button class="action-btn delete-btn"><i class="fas fa-trash-alt"></i></button>
+          </div>
+        </div>
+        <div class="calendar-entry">
+          <div>
+            <strong>2025-03-18</strong> - Regular Teaching - Day 2
+          </div>
+          <div>
+            <button class="action-btn edit-btn"><i class="fas fa-edit"></i></button>
+            <button class="action-btn delete-btn"><i class="fas fa-trash-alt"></i></button>
+          </div>
+        </div>
+      </div>
+      
+      <h3 style="margin-top: 2rem;">Add/Edit Calendar Entry</h3>
+      <div class="form-group">
+        <label for="calendar-date">Date</label>
+        <input type="date" id="calendar-date" min="2025-03-01" max="2025-08-31">
+      </div>
+      
+      <div class="form-group">
+        <label for="calendar-status">Status</label>
+        <select id="calendar-status">
+          <option value="teaching">Regular Teaching</option>
+          <option value="test">Test Day</option>
+          <option value="holiday">Holiday</option>
+          <option value="reading">Reading Holiday</option>
+          <option value="break">Break</option>
+          <option value="evaluation">Project Evaluation</option>
+          <option value="weekend">Weekend</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="calendar-details">Details</label>
+        <input type="text" id="calendar-details" placeholder="E.g., Regular Teaching - Day 1, Test-1 (DM), etc.">
+      </div>
+      
+      <button class="save-btn" id="save-calendar">Save Calendar Entry</button>
+    </div>
+    
+    <!-- Announcements Panel -->
+    <div class="panel" id="announcements-panel">
+      <h2>Manage Announcements</h2>
+      <p>Create and manage important announcements for students.</p>
+      
+      <div class="form-group">
+        <label for="announcement-title">Announcement Title</label>
+        <input type="text" id="announcement-title" placeholder="E.g., Schedule Change, Important Notice, etc.">
+      </div>
+      
+      <div class="form-group">
+        <label for="announcement-content">Content</label>
+        <textarea id="announcement-content" rows="5" placeholder="Enter the announcement details here..."></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="announcement-date">Valid Until</label>
+        <input type="date" id="announcement-date">
+      </div>
+      
+      <div class="form-group">
+        <label for="announcement-priority">Priority</label>
+        <select id="announcement-priority">
+          <option value="normal">Normal</option>
+          <option value="important">Important</option>
+          <option value="urgent">Urgent</option>
+        </select>
+      </div>
+      
+      <button class="save-btn" id="save-announcement">Publish Announcement</button>
+      
+      <h3 style="margin-top: 2rem;">Current Announcements</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Date</th>
+            <th>Priority</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Changed Test Schedule</td>
+            <td>Valid until 2025-04-15</td>
+            <td>Important</td>
+            <td>
+              <button class="action-btn edit-btn"><i class="fas fa-edit"></i></button>
+              <button class="action-btn delete-btn"><i class="fas fa-trash-alt"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>New Faculty Update</td>
+            <td>Valid until 2025-03-30</td>
+            <td>Normal</td>
+            <td>
+              <button class="action-btn edit-btn"><i class="fas fa-edit"></i></button>
+              <button class="action-btn delete-btn"><i class="fas fa-trash-alt"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Check if user is logged in
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!localStorage.getItem('isAdminLoggedIn')) {
+        window.location.href = 'admin_login.html';
+      }
+      
+      // Tab switching
+      const tabs = document.querySelectorAll('.tab');
+      const panels = document.querySelectorAll('.panel');
+      
+      tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          const tabId = this.getAttribute('data-tab');
+          
+          // Remove active class from all tabs and panels
+          tabs.forEach(t => t.classList.remove('active'));
+          panels.forEach(p => p.classList.remove('active'));
+          
+          // Add active class to current tab and panel
+          this.classList.add('active');
+          document.getElementById(`${tabId}-panel`).classList.add('active');
+        });
+      });
+      
+      // Logout functionality
+      document.getElementById('logout-btn').addEventListener('click', function() {
+        localStorage.removeItem('isAdminLoggedIn');
+        window.location.href = 'admin_login.html';
+      });
+      
+      // Sample save functionality (would be connected to backend in real implementation)
+      document.getElementById('save-timetable').addEventListener('click', function() {
+        // Show success notification
+        const notification = document.getElementById('success-notification');
+        notification.style.display = 'block';
+        
+        // Hide after 3 seconds
+        setTimeout(() => {
+          notification.style.display = 'none';
+        }, 3000);
+      });
+      
+      document.getElementById('save-calendar').addEventListener('click', function() {
+        // Show success notification
+        const notification = document.getElementById('success-notification');
+        notification.style.display = 'block';
+        
+        // Hide after 3 seconds
+        setTimeout(() => {
+          notification.style.display = 'none';
+        }, 3000);
+      });
+      
+      document.getElementById('save-announcement').addEventListener('click', function() {
+        // Show success notification
+        const notification = document.getElementById('success-notification');
+        notification.style.display = 'block';
+        
+        // Hide after 3 seconds
+        setTimeout(() => {
+          notification.style.display = 'none';
+        }, 3000);
+      });
+      
+      // In a real implementation, this would load data from a backend
+      // For demonstration, this is just a placeholder
+      function loadTimetableData() {
+        // This would fetch data from server
+      }
+      
+      function loadCalendarData() {
+        // This would fetch data from server
+      }
+      
+      function loadAnnouncementsData() {
+        // This would fetch data from server
+      }
+    });
+  </script>
+</body>
+</html> 
