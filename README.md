@@ -84,7 +84,7 @@ The project is built with vanilla HTML, CSS, and JavaScript. No build step or in
    git clone https://github.com/MBSciTech/Sem4_TT.git
    ```
 
-2. Open `timetable.html` in your browser or deploy the files to any web server
+2. Open `index.html` in your browser or deploy the files to any web server
 
 ## Technologies Used
 
